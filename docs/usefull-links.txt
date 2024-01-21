@@ -1,0 +1,5 @@
+https://circuitdigest.com/microcontroller-projects/interfacing-rfid-reader-module-with-arduino
+
+https://gist.github.com/alexey-bass/6b6e53e05d9a8d1468038ea78d536914
+https://github.com/miguelbalboa/rfid
+https://github.com/Jorgen-VikingGod/ESP8266-MFRC522
