@@ -27,7 +27,7 @@ void _SensorsManager::setup()
 		tempSensor->requestTemperatures();
 
 		int deviceCount = tempSensor->getDeviceCount();
-		// LOG__DEBUG_F("Update temperature: sensors count is: %d", deviceCount);
+		// LOG__DEBUG_F("Update temperature: sensors count is: %d pin is: GPIO%d", deviceCount, TEMPRETURE_SENSOR_ONE_WIRE_PIN);
 
 		for (int i = 0; i < deviceCount; i++)
 		{

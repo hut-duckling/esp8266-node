@@ -24,6 +24,7 @@ _HttpServer::_HttpServer() : AsyncWebServer(80), loggerHandler(AsyncLoggerWebHan
 void ICACHE_FLASH_ATTR _HttpServer::setup()
 {
 	DefaultHeaders &defaultHeaders = DefaultHeaders::Instance();
+	defaultHeaders.addHeader("Server", "HUT-Duckling (https://github.com/hut-duckling)");
 	defaultHeaders.addHeader("Access-Control-Allow-Origin", "*");
 	defaultHeaders.addHeader("Access-Control-Allow-Credentials", "true");
 	defaultHeaders.addHeader("Access-Control-Allow-Headers", "*");
@@ -35,6 +36,11 @@ void ICACHE_FLASH_ATTR _HttpServer::setup()
 
 	this->on("/fonts/glyphicons-halflings-regular.woff", HTTP_GET, [](AsyncWebServerRequest *request) {
 		AsyncWebServerResponse *response = request->beginResponse_P(200, "font/woff", glyphicons_halflings_regular_woff_gz, glyphicons_halflings_regular_woff_gz_len);
+		response->addHeader("Content-Encoding", "gzip");
+		request->send(response);
+	});
+	this->on("/fonts/glyphicons-halflings-regular.woff2", HTTP_GET, [](AsyncWebServerRequest *request) {
+		AsyncWebServerResponse *response = request->beginResponse_P(200, "font/woff2", glyphicons_halflings_regular_woff_gz, glyphicons_halflings_regular_woff_gz_len);
 		response->addHeader("Content-Encoding", "gzip");
 		request->send(response);
 	});
@@ -66,12 +72,11 @@ void ICACHE_FLASH_ATTR _HttpServer::setup()
 
 	this->on("/login", HTTP_GET, [](AsyncWebServerRequest *request) {
 		String remoteIP = request->client()->remoteIP().toString();
-		
-		// if (!request->authenticate(http_username, http_pass)) {
+		if (!request->authenticate("admin", ConfigManager.general.password.c_str())) {
 			// writeEvent("WARN", "websrv", "New login attempt", remoteIP);
-			// return request->requestAuthentication();
-		// }
-		request->send(200, "text/plain", "Success");
+			return request->requestAuthentication();
+		}
+		request->send(200, "application/json", "{status:true}");
 		// writeEvent("INFO", "websrv", "Login success!", remoteIP);
 	});
 	this->rewrite("/index", "/index.html");
@@ -84,42 +89,40 @@ void ICACHE_FLASH_ATTR _HttpServer::setup()
 
 void _HttpServer::getApiIndex(AsyncWebServerRequest *request)
 {
-	// StaticJsonDocument<512> doc;
+	JsonDocument doc;
 
-	// doc["status"] = true;
-	// JsonObject result = doc.createNestedObject("result");
-	// result["product"] = doc.createNestedObject();
-	// result["product"]["title"] = "HUT Duckling";
-	// result["author"] = doc.createNestedObject();
-	// result["author"]["name"] = "MohammadHasan Hosni";
-	// result["author"]["website"] = "https://hut.ac.ir/";
-	// result["owner"] = doc.createNestedObject();
-	// result["owner"]["name"] = "Hamedan University Of Technology";
-	// result["owner"]["website"] = "https://hut.ac.ir/";
-	// result["sensors"] = doc.createNestedObject();
-	// result["sensors"]["temperature"] = SensorsManager.getAvgTempreture();
-	// result["sensors"]["light"] = SensorsManager.getLightPercent();
+	doc["status"] = true;
+	doc["result"] = doc.add<JsonObject>();
+	doc["result"]["product"] = doc.add<JsonObject>();
+	doc["result"]["product"]["title"] = "ESP HUT Duckling";
+	doc["result"]["author"] = doc.add<JsonObject>();
+	doc["result"]["author"]["name"] = "MohammadHasan Hosni";
+	doc["result"]["author"]["website"] = "https://github.com/hut-duckling";
+	doc["result"]["owner"] = doc.add<JsonObject>();
+	doc["result"]["owner"]["name"] = "Hamedan University Of Technology";
+	doc["result"]["owner"]["website"] = "https://hut.ac.ir/";
+	doc["result"]["sensors"] = doc.add<JsonObject>();
+	doc["result"]["sensors"]["temperature"] = SensorsManager.getAvgTempreture();
+	doc["result"]["sensors"]["light"] = SensorsManager.getLightPercent();
 
-	// String output;
-	// serializeJson(doc, output);
-	// request->send(200, "application/json", output);
+	String output;
+	serializeJson(doc, output);
+	request->send(200, "application/json", output);
 }
 
 bool _HttpServer::sendError(AsyncWebServerRequest *request, const String &code, const String &input)
 {
-	// StaticJsonDocument<128> doc;
+	JsonDocument doc;
 
-	// doc["status"] = false;
-	// doc["error"] = code;
-	// if (input.length() > 0)
-	// {
-	// 	doc["input"] = input;
-	// }
-
-	// String output;
-	// serializeJson(doc, output);
-
-	// request->send(400, "application/json", output);
+	doc["status"] = false;
+	doc["error"] = code;
+	if (input.length() > 0)
+	{
+		doc["input"] = input;
+	}
+	String output;
+	serializeJson(doc, output);
+	request->send(400, "application/json", output);
 
 	return false;
 }
@@ -132,9 +135,9 @@ void _HttpServer::onNotFoundRequest(AsyncWebServerRequest *request) {
 <head><title>404 Not Found</title></head>\
 <body>\
 <center><h1>404 Not Found</h1></center>\
-<hr><center>HUT-Duckling/") + "</center>\
+<hr><center>HUT-Duckling</center>\
 </body>\
-</html>");
+</html>"));
 	}
 }
 

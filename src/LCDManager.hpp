@@ -36,8 +36,8 @@ public:
 	void setup();
 	void clearRow(uint8_t row);
 	static uint8_t getLcdAddress();
-	static uint8_t getLcdRows();
-	static uint8_t getLcdCols();
+	uint16_t getLcdRows();
+	uint16_t getLcdCols();
 };
 
 extern _LCDManager LCDManager;

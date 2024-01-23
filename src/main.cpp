@@ -1,26 +1,45 @@
 #include <Arduino.h>
-#include <Logger.hpp>
+#include <Ticker.h>
 #include <AsyncTimer.h>
-#include <LCDManager.hpp>
 #include <LittleFS.h>
+#include <Logger.hpp>
+#include <ConfigManager.hpp>
+#include <LCDManager.hpp>
 #include <I2CScanner.hpp>
 #include <SensorsManager.hpp>
 #include <RFIDManager.hpp>
 #include <OutputManager.hpp>
+#include <WifiManager.hpp>
 #include <HttpServer.hpp>
 #include <WebSocketServer.hpp>
+
+#ifdef DEBUG_ESP_PORT // to debug WiFi
+// #define DEBUG_ESP_PORT Serial
+#endif
 
 AsyncTimer asyncTimer(15U);
 void setup()
 {
   delay(1000);
   Logger.setup();
-  LOG__INFO(F("Starting"));
+  LOG__INFO("Starting");
 
   if (! LittleFS.begin()) {
-    LOG__ERROR(F("Can not start LittleFS! so format it!"));
+    LOG__ERROR("Can not start LittleFS! so format it!");
     LittleFS.format();
   }
+
+  LOG__DEBUG("Loading ConfigManager");
+  ConfigManager.load();
+  LOG__DEBUG("Loading ConfigManager [done]");
+
+  LOG__DEBUG("Setuping ConfigManager");
+  ConfigManager.setup();
+  LOG__DEBUG("Setuping ConfigManager [done]");
+
+  LOG__DEBUG("Setuping WifiManager");
+  WifiManager.setup();
+  LOG__DEBUG("Setuping WifiManager [done]");
 
   LOG__DEBUG("Starting I2CScanner Service");
   I2CScanner.setup();
@@ -50,21 +69,11 @@ void setup()
   LOG__DEBUG("Setuping HttpServer");
   HttpServer.setup();
   LOG__DEBUG("Setuping HttpServer [done]");
-
-  asyncTimer.setInterval([]() {
-    LCDManager.setCursor(0, 1);
-    LCDManager.print("RAM:" + String(ESP.getFreeHeap()) + "-" + String(millis()));
-    // LOG__DEBUG_F("light sensor value: %s", SensorsManager.getLightPercent().c_str());
-  }, 1 * 1000);
 }
 
 void loop()
 {
-  // LOG__DEBUG_F("availble memory before execute loop: %u bytes", ESP.getFreeHeap());
-
-  // LOG__DEBUG("Handling async actions");
+  LOG__TRACE_F("availble memory before execute loop: %u bytes", ESP.getFreeHeap());
   asyncTimer.handle();
-  // LOG__DEBUG("Handling async actions [done]");
-
-  // LOG__DEBUG_F("availble memory after execute loop: %u bytes", ESP.getFreeHeap());
+  LOG__TRACE_F("availble memory after execute loop: %u bytes", ESP.getFreeHeap());
 }

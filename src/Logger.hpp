@@ -9,8 +9,16 @@
 #define STR_INDIR(x) #x
 #define STR(x) STR_INDIR(x)
 #define LOGPREFIX __FILE__ ":" STR(__LINE__) "  "
-#ifdef __PLATFORMIO_BUILD_DEBUG__
 
+#ifdef LOGGER_ENABLE_TRACE_LOG
+#define LOG__TRACE(str...) Logger.log(F(LOGPREFIX "[TRACE] "), str);
+#define LOG__TRACE_F(format, str...) Logger.logf(F(LOGPREFIX "[TRACE] "), format, str);
+#else
+#define LOG__TRACE(str...)
+#define LOG__TRACE_F(format, str...)
+#endif
+
+#ifdef LOGGER_ENABLE_DEBUG_LOG
 #define LOG__DEBUG(str...) Logger.log(F(LOGPREFIX "[DEBUG] "), str);
 #define LOG__DEBUG_F(format, str...) Logger.logf(F(LOGPREFIX "[DEBUG] "), format, str);
 #else

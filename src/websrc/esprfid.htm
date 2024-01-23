@@ -68,159 +68,10 @@
     <br>
     <br>
     <legend>تنظیمات سخت‌افزار</legend>
-    <div class="row form-group">
-        <label class="col-xs-3">نوع کارتخوان<i style="margin-right: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="left" data-content="لطفا نوع کارتخوان RFID خود را انتخاب کنید."></i></label>
-        <div class="col-xs-9 col-md-5">
-            <select class="form-control input-sm" id="readerType" onchange="handleReader();">
-                <option selected="selected" value="0">MFRC522</option>
-                <option value="1">Wiegand</option>
-                <option value="2">PN532</option>
-                <option value="3">RDM6300</option>
-                <option value="4">MFRC522 + RDM6300</option>
-                <option value="5">Wiegand + RDM6300</option>
-                <option value="6">PN532 + RDM6300</option>
-            </select>
-        </div>
-    </div>
-    <div class="" id="wiegandForm" style="display:none">
-        <div class="row form-group">
-            <label class="col-xs-3">پایه D0<i style="margin-right: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="left" data-content="لطفا پایه D0 کارتخوان Wiegand را انتخاب کنید."></i></label>
-            <span class="col-xs-9 col-md-5">
-                  <select class="form-control input-sm" id="wg0pin">
-                    <option value="0">GPIO-0</option>
-                    <option value="1">GPIO-1</option>
-                    <option value="2">GPIO-2</option>
-                    <option selected="selected" value="4">GPIO-4</option>
-                    <option value="5">GPIO-5</option>
-                    <option value="12">GPIO-12</option>
-                    <option value="13">GPIO-13</option>
-                    <option value="14">GPIO-14</option>
-                    <option value="15">GPIO-15</option>
-                    <option value="16">GPIO-16</option>
-                  </select>
-                </span>
-        </div>
-        <div class="row form-group">
-            <label class="col-xs-3">پایه D1<i style="margin-right: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="left" data-content="لطفا پایه D1 کارتخوان Wiegand را انتخاب کنید"></i></label>
-            <span class="col-xs-9 col-md-5">
-                  <select class="form-control input-sm" id="wg1pin">
-                    <option value="0">GPIO-0</option>
-                    <option value="1">GPIO-1</option>
-                    <option value="2">GPIO-2</option>
-                    <option value="4">GPIO-4</option>
-                    <option selected="selected" value="5">GPIO-5</option>
-                    <option value="12">GPIO-12</option>
-                    <option value="13">GPIO-13</option>
-                    <option value="14">GPIO-14</option>
-                    <option value="15">GPIO-15</option>
-                    <option value="16">GPIO-16</option>
-                  </select>
-                </span>
-        </div>
-    </div>
-    <div class="" id="mfrc522Form" style="display:none">
-        <div class="row form-group">
-            <label class="col-xs-3">پین SS پرتکل SPI<i style="margin-right: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="left" data-content="Choose which ESP port is connected to RFID Hardware SDA pin"></i></label>
-            <span class="col-xs-9 col-md-5">
-                  <select class="form-control input-sm" id="gpioss">
-                    <option value="0">GPIO-0</option>
-                    <option value="2">GPIO-2</option>
-                    <option value="4">GPIO-4</option>
-                    <option value="5">GPIO-5</option>
-                    <option selected="selected" value="15">GPIO-15</option>
-                    <option value="16">GPIO-16</option>
-                  </select>
-                </span>
-        </div>
-        <div class="row form-group" id="rc522gain">
-            <label class="col-xs-3">قدرت آنتن کارت<i style="margin-right: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="left" data-content="Higher value means further the RFID reader's reading distance"></i></label>
-            <span class="col-xs-9 col-md-5">
-                  <select class="form-control input-sm" id="gain">
-                    <option value="112">Max (48 db)</option>
-                    <option value="96">43 db</option>
-                    <option value="48">38 db</option>
-                    <option selected="selected" value="32">Avg (33 db)</option>
-                    <option value="16">23 db</option>
-                    <option value="0">Min (18 db)</option>
-                  </select>
-                </span>
-        </div>
-    </div>
-    <br>
-    <div class="row form-group">
-        <label class="col-xs-3">ال‌ای‌دی وای‌فای<i style="margin-right: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="left" data-content="پایه ال‌ای‌دی وای‌فای را انتخاب کنید"></i></label>
-        <span class="col-xs-9 col-md-5">
-              <select class="form-control input-sm" id="wifipin">
-                <option selected="selected" value="255">None</option>
-                <option value="0">GPIO-0</option>
-                <option value="1">GPIO-1</option>
-                <option value="2">GPIO-2 (LED_BUILTIN)</option>
-                <option value="4">GPIO-4</option>
-                <option value="5">GPIO-5</option>
-                <option value="12">GPIO-12</option>
-                <option value="13">GPIO-13</option>
-                <option value="14">GPIO-14</option>
-                <option value="15">GPIO-15</option>
-                <option value="16">GPIO-16</option>
-              </select>
-        </span>
-    </div>
-    <div class="row form-group">
-        <label class="col-xs-3">حالت رله<i style="margin-right: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="left" data-content="متناسب با سیم‌بندی سخت‌افزار، نوع کارکرد رله را مشخص کنید"></i></label>
-        <span class="col-xs-9 col-md-5">
-            <select class="form-control input-sm" id="typerly">
-              <option selected="selected" value="1">Active High</option>
-              <option value="0">Active Low</option>
-            </select>
-            </span>
-    </div>
-    <div class="row form-group">
-        <label class="col-xs-3">پایه رله<i style="margin-right: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="left" data-content="لطفا مشخص کنید کدام پایه از برد به رله شما متصل شده است؟"></i></label>
-        <span class="col-xs-6 col-md-5">
-                <select class="form-control input-sm" id="gpiorly">
-                    <option value="0">GPIO-0</option>
-                    <option value="1">GPIO-1</option>
-                    <option value="2">GPIO-2</option>
-                    <option selected="selected" value="4">GPIO-4</option>
-                    <option value="5">GPIO-5</option>
-                    <option value="12">GPIO-12</option>
-                    <option value="13">GPIO-13</option>
-                    <option value="14">GPIO-14</option>
-                    <option value="15">GPIO-15</option>
-                    <option value="16">GPIO-16</option>
-                </select>
-              </span>
-        <span class="col-xs-3">
-            <button id="testb" type="button" class="btn btn-primary btn-xs" onclick="testRelay()">تست</button><i style="margin-right: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="left" data-content="آزمایش کارکرد صحیح رله؛ با کلیک بر روی این گزینه، رله فعال خواهد شد!"></i>
-        </span>
-    </div>
-    <div class="row form-group">
-        <label class="col-xs-3">حالت قفل<i style="margin-right: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="left" data-content="نوع کارکرد رله را مشخص کنید"></i></label>
-        <span class="col-xs-9 col-md-5">
-            <select class="form-control input-sm" id="lockType" onchange="handleLock();">
-                <option selected="selected" value="0">آنی</option>
-                <option value="1">ممتد</option>
-            </select>
-        </span>
-    </div>
     <div class="row form-group" id="activateTimeForm">
-        <label class="col-xs-3">زمان فعال بودن<i style="margin-right: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="left" data-content="زمان فعال بودن رله را مشخص کنید؛ این زمان به میلی‌ثانیه می‌باشد."></i></label>
+        <label class="col-xs-3">زمان فعال بودن<i style="margin-right: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="left" data-content="زمان فعال بودن رله را مشخص کنید؛ این زمان به ثانیه می‌باشد."></i></label>
         <span class="col-xs-9 col-md-5">
-            <input class="form-control input-sm" value="300" placeholder="in Microsecond" id="delay" type="text" name="hightime">
-        </span>
-    </div>
-    <br>
-    <div class="row form-group">
-        <label class="col-xs-3">پایه کلید فشاری<i style="margin-right: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="left" data-content="در صورت تمایل، یک پایه از برد را به عنوان کلید مشخص کنید که در صورت فشردن کلید، همانند زمانی عمل خواهد کرد که استاد وارد کلاس شده باشد."></i></label>
-        <span class="col-xs-9 col-md-5">
-            <select class="form-control input-sm" id="buttonPin">
-                <option selected="selected" value="255">هیچکدام!</option>
-                <option value="4">GPIO-4</option>
-                <option value="5">GPIO-5</option>
-                <option value="12">GPIO-12</option>
-                <option value="13">GPIO-13</option>
-                <option value="14">GPIO-14</option>
-            </select>
+            <input class="form-control input-sm" value="300" placeholder="به ثانیه" id="delay" type="text" name="hightime">
         </span>
     </div>
     <div class="row form-group">
@@ -428,17 +279,9 @@
     </div>
     <br>
     <div class="row form-group">
-        <label class="col-xs-3">خاموش کردن خودکار وای‌فای<i style="margin-right: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="left" data-content="پس از گذشت چه زمانی شبکه وای‌فای غیرفعال شود؟ این امکان برای کاهش مصرف توان برد در نظر گرفته شده است؛ اما با ورود یک استاد به کلاس، دستگاه مجددا به شبکه متصل خواهد شد."></i></label>
+        <label class="col-xs-3">تعداد تلاش ناموفق<i style="margin-right: 10px;" class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="popover" data-trigger="hover" data-placement="left" data-content="با تنظیم این گزینه مشخص کنید بعد از چند تلاش ناموفق برای اتصال به وای‌فای، دستگاه به حالت اکسس‌پوینت تنظیم شود. این گزینه برای عدم از بین رفتن دسترسی شما به دستگاه می‌باشد."></i></label>
         <span class="col-xs-9 col-md-5">
-                <select class="form-control input-sm" id="disable_wifi_after_seconds" name="auto_restart_interval_seconds">
-                  <option value='0'>همیشه روشن</option>
-                  <option value='180'>3 دقیقه</option>
-                  <option value='240'>4 دقیقه</option>
-                  <option value='300'>5 دقیقه</option>
-                  <option value='600'>10 دقیقه</option>
-                  <option value='900'>15 دقیقه</option>
-                  <option value='1800'>30 دقیقه</option>
-                </select>
+                <input id="failed_connect_count" class="form-control input-sm">
               </span>
         <br>
         <br>

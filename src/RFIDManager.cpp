@@ -31,7 +31,13 @@ void _RFIDManager::scan()
 	byte v = mfrc522->PCD_ReadRegister(mfrc522->PCD_Register::VersionReg);
 	if ((v == 0x00) || (v == 0xFF))
 	{
+		hasRFIDDisconnected = true;
 		LOG__ERROR("Communication FAILURE!, Is the MFRC522 properly connected?");
+	}
+	else if (hasRFIDDisconnected)
+	{
+		mfrc522->PCD_Init();
+		hasRFIDDisconnected = false;
 	}
 
 	if (!mfrc522->PICC_IsNewCardPresent())
@@ -88,6 +94,7 @@ void _RFIDManager::handleCardAccess(String *uid, String *type)
 
 	LOG__DEBUG("Begin RFIDManager::handleCardAccess toggleRelay");
 	OutputManager.toggleRelay();
+	OutputManager.buzzerTone(1, 500);
 	LOG__DEBUG("Begin RFIDManager::handleCardAccess toggleRelay [done]");
 
 	LOG__DEBUG(F("Begin RFIDManager::handleCardAccess [done]"));

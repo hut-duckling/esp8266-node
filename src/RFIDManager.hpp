@@ -19,6 +19,7 @@ protected:
 private:
 	_Logger *logger;
 	MFRC522 *mfrc522;
+	bool hasRFIDDisconnected = false;
 	unsigned short intervalId = 0;
 };
 

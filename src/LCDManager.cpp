@@ -3,6 +3,8 @@
 #include <Logger.hpp>
 #include <AsyncTimer.h>
 #include <SensorsManager.hpp>
+#include <WifiManager.hpp>
+#include <TimeLib.h>
 
 extern AsyncTimer asyncTimer;
 
@@ -14,7 +16,12 @@ _LCDManager::_LCDManager(uint8_t lcd_address, uint8_t lcd_cols, uint8_t lcd_rows
 
 void _LCDManager::setup()
 {
-	LOG__DEBUG(F("Begin LCDManager::setup"));
+	LOG__DEBUG_F(
+		"Begin LCDManager::setup with rows: %d and cols: %d at address: (0x%x)",
+		this->getLcdRows(),
+		this->getLcdRows(),
+		this->getLcdAddress()
+	);
 	begin(LCD_COLS, LCD_ROWS);
 	init();
 	backlight();
@@ -44,21 +51,56 @@ void _LCDManager::setup()
 			), 0);
 			this->print(temperature);
 			this->write(CELSIUS_SYM);
+
+			if (this->getLcdCols() - lastLength >= 5) { // 03:30
+				this->setCursor(0, 0);
+				if (this->getLcdCols() - lastLength >= 8) { // 03:30:33]
+					char time[9];
+					sprintf(time, "%02d:%02d:%02d", hour(), minute(), second());
+					LOG__TRACE_F("time is: %s", time);
+					this->print(time);
+				} else { // 03:30
+					char time[6];
+					sprintf(time, "%02d:%02d", hour(), minute());
+					LOG__TRACE_F("time is: %s", time);
+					this->print(time);
+				}
+			}
 		}
 		else if (view == 1)
 		{
 			this->clearRow(0);
-			String ip("255.255.255.255");
-			this->setCursor(this->getLcdCols() - (lastLength += ip.length() + 1), 0);
+			this->setCursor(0, 0);
 			this->write(WIFI_SIGNAL_C_SYM);
-			this->print(ip.c_str());
+
+			String ip = WifiManager.getIpAddress().toString();
+			if (ip.length() < this->getLcdCols() - 1) {
+				this->setCursor(2, 0);
+			} else {
+				this->setCursor(1, 0);
+			}
+			this->print(WifiManager.getIpAddress().toString().c_str());
+		}
+		else if (view == 2)
+		{
+			this->clearRow(0);
+			this->setCursor(0, 0);
+			this->write(WIFI_SIGNAL_C_SYM);
+			this->print(WifiManager.getWifiSSID().c_str());
+		}
+		else if (view == 3)
+		{
+			this->clearRow(0);
+			this->setCursor(0, 0);
+			this->print(F("FreeHeap: "));
+			this->print(ESP.getFreeHeap());
 		}
 
-		if (++view > 1)
+		if (++view > 3)
 		{
 			view = 0;
 		}
-	}, 2 * 1000);
+	}, 1.5 * 1000);
 }
 
 void _LCDManager::clearRow(uint8_t row)
@@ -66,7 +108,7 @@ void _LCDManager::clearRow(uint8_t row)
 	for (int x = 0; x < this->getLcdCols(); x++)
 	{
 		this->setCursor(x, row);
-		this->print(' ');
+		this->print(F(" "));
 	}
 }
 
@@ -75,12 +117,12 @@ uint8_t _LCDManager::getLcdAddress()
 	return LCD_ADDRESS;
 }
 
-uint8_t _LCDManager::getLcdRows()
+uint16_t _LCDManager::getLcdRows()
 {
 	return LCD_ROWS;
 }
 
-uint8_t _LCDManager::getLcdCols()
+uint16_t _LCDManager::getLcdCols()
 {
 	return LCD_COLS;
 }

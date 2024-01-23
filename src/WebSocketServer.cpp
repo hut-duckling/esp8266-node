@@ -1,6 +1,7 @@
 #include "WebSocketServer.hpp"
 #include <ArduinoJson.h>
 #include <Logger.hpp>
+#include "WebSocketServerResponse.esp"
 
 _WebSocketServer WebSocketServer;
 
@@ -68,8 +69,7 @@ void _WebSocketServer::onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *c
 
 void ICACHE_FLASH_ATTR _WebSocketServer::process(AsyncWebSocketClient *client, size_t size)
 {
-	// We should always get a JSON object (stringfied) from browser, so parse it
-	JsonDocument root;
+	JsonDocument root; // We should always get a JSON object (stringfied) from browser, so parse it
 
 	char json[size + 1];
 	memcpy(json, (char *)(client->_tempObject), size);
@@ -83,7 +83,35 @@ void ICACHE_FLASH_ATTR _WebSocketServer::process(AsyncWebSocketClient *client, s
 		// delete client->_tempObject;
 		return;
 	}
+	if (!root.containsKey("command")) {
+		free(client->_tempObject);
+		client->_tempObject = NULL;
+	}
+
 	const char *command = root["command"];
+	LOG__INFO_F("Websocket request, command: %s", command);
+
+	if (strcmp(command, "status") == 0) {
+		wsSendStatus();
+	}
+	else if (strcmp(command, "getconf") == 0) {
+		wsSendConfig();
+	}
+	else if (strcmp(command, "configfile") == 0) {
+		wsWriteConfigFileFromJsonDocument(&root);
+	}
+	else if (strcmp(command, "gettime") == 0) {
+		wsSendTime();
+	}
+	else if (strcmp(command, "settime") == 0) {
+		if (root.containsKey("epoch")) {
+			time_t time = root["epoch"].as<time_t>();;
+			setTime(time);
+		}
+	}
+	else if (strcmp(command, "scan") == 0) {
+		WiFi.scanNetworksAsync(wsSendWifiScanResult, true);
+	}
 
 	free(client->_tempObject);
 	client->_tempObject = NULL;

@@ -1,0 +1,138 @@
+#include "WebSocketServer.hpp"
+#include <ArduinoJson.h>
+#include <Logger.hpp>
+#include <Ntp.h>
+#include <LittleFS.h>
+#include <ESP8266WiFi.h>
+#include <ConfigManager.hpp>
+
+void ICACHE_FLASH_ATTR wsSendStatus() {
+	FSInfo fsinfo;
+	if (!LittleFS.info(fsinfo)) {
+
+	}
+	JsonDocument root;
+
+	root["command"] = "status";
+	root["heap"] = ESP.getFreeHeap();
+	root["chipid"] = String(ESP.getChipId(), HEX);
+	root["cpu"] = ESP.getCpuFreqMHz();
+	root["sketchsize"] = ESP.getSketchSize();
+	root["availsize"] = ESP.getFreeSketchSpace();
+	root["availspiffs"] = fsinfo.totalBytes - fsinfo.usedBytes;
+	root["spiffssize"] = fsinfo.totalBytes;
+	root["uptime"] = ConfigManager.ntpClient->getDeviceUptimeString();
+	root["version"] = FIRMWARE_VERISON;
+
+	struct ip_info info;
+	if (ConfigManager.network.mode == WifiMode_AP) {
+		wifi_get_ip_info(SOFTAP_IF, &info);
+		struct softap_config conf;
+		wifi_softap_get_config(&conf);
+		root["ssid"] = String(reinterpret_cast<char *>(conf.ssid));
+		root["dns"] = WiFi.softAPIP().toString();
+		root["mac"] = WiFi.softAPmacAddress();
+	} else {
+		wifi_get_ip_info(STATION_IF, &info);
+		struct station_config conf;
+		wifi_station_get_config(&conf);
+		root["ssid"] = String(reinterpret_cast<char *>(conf.ssid));
+		root["dns"] = WiFi.dnsIP().toString();
+		root["mac"] = WiFi.macAddress();
+	}
+
+	IPAddress ipaddr = IPAddress(info.ip.addr);
+	IPAddress gwaddr = IPAddress(info.gw.addr);
+	IPAddress nmaddr = IPAddress(info.netmask.addr);
+	root["ip"] = ipaddr.toString();
+	root["gateway"] = gwaddr.toString();
+	root["netmask"] = nmaddr.toString();
+
+	String json;
+	serializeJson(root, json);
+	WebSocketServer.textAll(json);
+}
+
+void ICACHE_FLASH_ATTR wsSendConfig() {
+	JsonDocument doc;
+
+	doc["command"] = "configfile";
+	ConfigManager.network.addToJsonDocument(&doc, "network");
+	ConfigManager.hardware.addToJsonDocument(&doc, "hardware");
+	ConfigManager.general.addToJsonDocument(&doc, "general");
+	ConfigManager.ntp.addToJsonDocument(&doc, "ntp");
+	ConfigManager.mqtt.addToJsonDocument(&doc, "mqtt");
+
+	String json;
+	serializeJson(doc, json);
+	WebSocketServer.textAll(json);
+}
+
+void ICACHE_FLASH_ATTR wsSendTime()
+{
+	JsonDocument doc;
+
+	doc["command"] = "gettime";
+	doc["epoch"] = now();
+	doc["timezone"] = ConfigManager.ntp.timezone;
+
+	String json;
+	serializeJson(doc, json);
+	WebSocketServer.textAll(json);
+}
+
+void ICACHE_FLASH_ATTR wsSendWifiScanResult(int networksFound) {
+	// sort by RSSI
+	int n = networksFound;
+	int indices[n];
+	int skip[n];
+	for (int i = 0; i < networksFound; i++) {
+		indices[i] = i;
+	}
+	for (int i = 0; i < networksFound; i++) {
+		for (int j = i + 1; j < networksFound; j++) {
+			if (WiFi.RSSI(indices[j]) > WiFi.RSSI(indices[i])) {
+				std::swap(indices[i], indices[j]);
+				std::swap(skip[i], skip[j]);
+			}
+		}
+	}
+	JsonDocument doc;
+	doc["command"] = "ssidlist";
+	doc["list"] = doc.add<JsonArray>();
+	for (int i = 0; i < 5 && i < networksFound; ++i) {
+		JsonObject item = doc["list"].add<JsonObject>();
+		item["ssid"] = WiFi.SSID(indices[i]);
+		item["bssid"] = WiFi.BSSIDstr(indices[i]);
+		item["rssi"] = WiFi.RSSI(indices[i]);
+		item["channel"] = WiFi.channel(indices[i]);
+		item["enctype"] = WiFi.encryptionType(indices[i]);
+		item["hidden"] = WiFi.isHidden(indices[i]) ? true : false;
+	}
+	WiFi.scanDelete();
+
+	String json;
+	serializeJson(doc, json);
+	WebSocketServer.textAll(json);
+}
+
+void ICACHE_FLASH_ATTR wsWriteConfigFileFromJsonDocument(JsonDocument *root)
+{
+	File file = LittleFS.open("/config.json", "w+");
+	if (file)
+	{
+		LOG__INFO("Opened /config.json to write incoming config");
+		serializeJson((*root), file);
+		file.close();
+		LOG__INFO("Opened /config.json to write incoming config [done]");
+
+		// writeEvent("INFO", "sys", "Config stored in the SPIFFS", String(len) + " bytes");
+
+		LOG__WARN("Board is going to restart");
+		ConfigManager.restart();
+	}
+	else
+	{
+		LOG__WARN("Can not open config file to write!");
+	}
+}

@@ -16,7 +16,7 @@ var config = {
         "wmode": 1,
         "hide": 0,
         "pswd": "",
-        "offtime": 0,
+        "failed_connect_count": 0,
         "dhcp": 1,
         "ip": "",
         "subnet": "",
@@ -303,7 +303,7 @@ function savenetwork() {
     config.network.pswd = document.getElementById("wifipass").value;
 
 
-    config.network.offtime = parseInt(document.getElementById("disable_wifi_after_seconds").value);
+    config.network.failed_connect_count = parseInt(document.getElementById("failed_connect_count").value);
     uncommited();
 }
 
@@ -424,7 +424,7 @@ function listnetwork() {
         handleSTA();
     }
 
-    document.getElementById("disable_wifi_after_seconds").value = config.network.offtime;
+    document.getElementById("failed_connect_count").value = config.network.failed_connect_count;
 
 }
 
@@ -463,7 +463,7 @@ function listSSID(obj) {
         var opt = document.createElement("option");
         opt.value = obj.list[i].ssid;
         opt.bssidvalue = obj.list[i].bssid;
-        opt.innerHTML = "شناسه شبکه: " + obj.list[i].bssid + ", قدرت سیگنال: %" + percentage + ", نام شبکه: " + obj.list[i].ssid;
+        opt.innerHTML = "نام شبکه: " + obj.list[i].ssid + " سیگنال: %" + percentage + " شناسه: " + obj.list[i].bssid;
         select.appendChild(opt);
     }
     document.getElementById("scanb").innerHTML = "جستجوی مجدد";
