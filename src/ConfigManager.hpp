@@ -5,6 +5,7 @@
 #include <ArduinoJson.h>
 #include <Ntp.h>
 #include <ConfigTypes.hpp>
+#include <WifiManager.hpp>
 
 class _ConfigManager
 {
@@ -16,9 +17,9 @@ public:
 	void save();
 
 	NetworkConfig network = {
-		.mode = WifiMode_CLIENT,
-		.ssid = "InKhabarAzManBebar",
-		.password = "21721959",
+		.mode = WifiMode_AP,
+		.ssid = WifiManager.getDefaultHostname(),
+		.password = "12345678",
 		.apip = "192.168.4.1",
 		.apsubnet = "255.255.255.0",
 		.dns = "8.8.8.8",
