@@ -161,6 +161,10 @@ void _RFIDManager::handleCardAccess(String *uid, String *type)
 		serializeJson(doc, json);
 		WebSocketServer.textAll(json);
 
+		String data = String(uid->c_str());
+		data += " " + String(type->c_str());
+		Logger.writeEvent("WARN", "rfid", "اسکن کارت ناشناخته", data);
+
 		LCDManager.setCursor(0, LCDManager.getLcdRows() - 1);
 		LCDManager.print("Unauthorized card!");
 		asyncTimer.setTimeout([]() {
@@ -171,7 +175,6 @@ void _RFIDManager::handleCardAccess(String *uid, String *type)
 		asyncTimer.setTimeout([]() {
 			OutputManager.buzzerTone(1, 500);
 		}, 600);
-
 	}
 
 	LOG__DEBUG(F("Begin RFIDManager::handleCardAccess [done]"));

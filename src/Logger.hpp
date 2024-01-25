@@ -75,6 +75,9 @@ public:
 		log(p1, p2.c_str(), p3.c_str());
 	}
 
+	void writeEvent(String type, String src, String desc, String data);
+	void writeLatest(String uid, String username, int acctype);
+
 private:
 	Stream *stream;
 };

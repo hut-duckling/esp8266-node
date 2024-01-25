@@ -167,8 +167,7 @@ void ICACHE_FLASH_ATTR sendEventLog(int page) {
 	JsonDocument root;
 	root["command"] = "eventlist";
 	root["page"] = page;
-
-	JsonArray items = root.add<JsonArray>();
+	root["items"] = root.add<JsonArray>();
 	File eventlog = LittleFS.open("/eventlog.json", "r");
 	int first = (page - 1) * 10;
 	int last = page * 10;
@@ -177,7 +176,7 @@ void ICACHE_FLASH_ATTR sendEventLog(int page) {
 		String item = String();
 		item = eventlog.readStringUntil('\n');
 		if (i >= first && i < last) {
-			items.add(item);
+			root["items"].add(item);
 		}
 		i++;
 	}
@@ -195,8 +194,8 @@ void ICACHE_FLASH_ATTR sendLatestLog(int page) {
 	JsonDocument root;
 	root["command"] = "latestlist";
 	root["page"] = page;
-	JsonArray items = root.add<JsonArray>();
-	File latestlog = SPIFFS.open("/latestlog.json", "r");
+	root["items"] = root.add<JsonArray>();
+	File latestlog = LittleFS.open("/latestlog.json", "r");
 	int first = (page - 1) * 10;
 	int last = page * 10;
 	int i = 0;
@@ -204,7 +203,7 @@ void ICACHE_FLASH_ATTR sendLatestLog(int page) {
 		String item = String();
 		item = latestlog.readStringUntil('\n');
 		if (i >= first && i < last) {
-			items.add(item);
+			root["items"].add(item);
 		}
 		i++;
 	}

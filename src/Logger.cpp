@@ -2,6 +2,9 @@
 #include <Arduino.h>
 #include <string.h>
 #include <HardwareSerial.h>
+#include <ArduinoJson.h>
+#include <LittleFS.h>
+#include <TimeLib.h>
 
 _Logger Logger(&Serial);
 
@@ -101,4 +104,29 @@ void _Logger::logf(const __FlashStringHelper *p1, const char *format, ...) const
 		delete[] buffer;
 	}
 	stream->println();
+}
+
+void ICACHE_FLASH_ATTR _Logger::writeEvent(String type, String src, String desc, String data) {
+	JsonDocument root;
+	root["type"] = type;
+	root["src"] = src;
+	root["desc"] = desc;
+	root["data"] = data;
+	root["time"] = now();
+	File eventlog = LittleFS.open("/eventlog.json", "a");
+	serializeJson(root, eventlog);
+	eventlog.print("\n");
+	eventlog.close();
+}
+
+void ICACHE_FLASH_ATTR _Logger::writeLatest(String uid, String username, int acctype) {
+	JsonDocument root;
+	root["uid"] = uid;
+	root["username"] = username;
+	root["acctype"] = acctype;
+	root["timestamp"] = now();
+	File latestlog = LittleFS.open("/latestlog.json", "a");
+	serializeJson(root, latestlog);
+	latestlog.print("\n");
+	latestlog.close();
 }

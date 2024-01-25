@@ -106,12 +106,12 @@ struct MqttConfig
 	String password;
 	inline void fromJsonDocument(JsonDocument *doc, const char* key)
 	{
-		enabled = (*doc)[key]["mqtt"]["enabled"].as<bool>();
-		host = (*doc)[key]["mqtt"]["host"].as<String>();
-		port = (*doc)[key]["mqtt"]["port"].as<int>();
-		topic = (*doc)[key]["mqtt"]["topic"].as<String>();
-		user = (*doc)[key]["mqtt"]["user"].as<String>();
-		password = (*doc)[key]["mqtt"]["pswd"].as<String>();
+		enabled = (*doc)[key]["enabled"].as<bool>();
+		host = (*doc)[key]["host"].as<String>();
+		port = (*doc)[key]["port"].as<int>();
+		topic = (*doc)[key]["topic"].as<String>();
+		user = (*doc)[key]["user"].as<String>();
+		password = (*doc)[key]["pswd"].as<String>();
 
 	}
 	inline void addToJsonDocument(JsonDocument *doc, const char* key)

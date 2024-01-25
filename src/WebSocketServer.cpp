@@ -3,6 +3,7 @@
 #include <Logger.hpp>
 #include "WebSocketServerResponse.esp"
 
+
 _WebSocketServer WebSocketServer;
 
 _WebSocketServer::_WebSocketServer() : AsyncWebSocket("/ws")
@@ -121,6 +122,30 @@ void ICACHE_FLASH_ATTR _WebSocketServer::process(AsyncWebSocketClient *client, s
 		String filename = "/P/";
 		filename += uid;
 		LittleFS.remove(filename);
+	}
+	else if (strcmp(command, "geteventlog") == 0)
+	{
+		int page = root["page"];
+		sendEventLog(page);
+	}
+	else if (strcmp(command, "getlatestlog") == 0)
+	{
+		int page = root["page"];
+		sendLatestLog(page);
+	}
+	else if (strcmp(command, "clearevent") == 0)
+	{
+		LittleFS.remove("/eventlog.json");
+		Logger.writeEvent("WARN", "sys", "events cleared!", "");
+	}
+	else if (strcmp(command, "clearlatest") == 0)
+	{
+		LittleFS.remove("/latestlog.json");
+		Logger.writeEvent("WARN", "sys", "Logs cleared!", "");
+	}
+	else if (strcmp(command, "writeevent") == 0) {
+		// const char *uid = root["uid"];
+		// writeEvent();
 	}
 	else if (strcmp(command, "userfile") == 0) {
 		LOG__INFO("got new user to store");

@@ -28,7 +28,7 @@ public:
 	GeneralConfig general = {
 		.password = "admin",
 		.hostname=WifiManager.getDefaultHostname()};
-	MqttConfig mqtt;
+	MqttConfig mqtt={};
 	NtpConfig ntp = {
 		.server = "pool.ntp.org", // currently, WiFi.hostByName SUCKS! use IP instead.
 		.interval = 1000,
