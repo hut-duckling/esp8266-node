@@ -109,6 +109,10 @@ void _RFIDManager::handleCardAccess(String *uid, String *type)
 				}, 3000);
 				LOG__DEBUG("Give Access [done]");
 
+				String data = String(username.c_str());
+				data += " " + String(uid->c_str());
+				Logger.writeEvent("WARN", "rfid", "Say hello to teacher!", data);
+
 				WebSocketServer.textAll("{\"command\":\"giveAccess\"}");
 			} else {
 				LOG__DEBUG("Give Access: card expired");
@@ -130,6 +134,10 @@ void _RFIDManager::handleCardAccess(String *uid, String *type)
 			}, 3000);
 			LOG__DEBUG("Give Access [done]");
 
+			String data = String(username.c_str());
+			data += " " + String(uid->c_str());
+			Logger.writeEvent("WARN", "rfid", "Say hello to teacher!", data);
+
 			WebSocketServer.textAll("{\"command\":\"giveAccess\"}");
 		}
 		else
@@ -146,6 +154,10 @@ void _RFIDManager::handleCardAccess(String *uid, String *type)
 			String json;
 			serializeJson(doc, json);
 			WebSocketServer.textAll(json);
+
+			String data = String(uid->c_str());
+			data += " " + String(type->c_str());
+			Logger.writeEvent("WARN", "rfid", "Unknown Card!", data);
 		}
 
 		file.close();
@@ -163,7 +175,7 @@ void _RFIDManager::handleCardAccess(String *uid, String *type)
 
 		String data = String(uid->c_str());
 		data += " " + String(type->c_str());
-		Logger.writeEvent("WARN", "rfid", "اسکن کارت ناشناخته", data);
+		Logger.writeEvent("WARN", "rfid", "Unknown Card!", data);
 
 		LCDManager.setCursor(0, LCDManager.getLcdRows() - 1);
 		LCDManager.print("Unauthorized card!");
