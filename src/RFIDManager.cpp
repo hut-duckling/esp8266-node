@@ -8,6 +8,7 @@
 #include <OutputManager.hpp>
 #include <TimeLib.h>
 #include <WebSocketServer.hpp>
+#include <LCDManager.hpp>
 
 extern AsyncTimer asyncTimer;
 _RFIDManager RFIDManager;
@@ -101,6 +102,11 @@ void _RFIDManager::handleCardAccess(String *uid, String *type)
 				LOG__DEBUG("Give Access");
 				OutputManager.toggleRelay();
 				OutputManager.buzzerTone(1, 500);
+				LCDManager.setCursor(0, LCDManager.getLcdRows() - 1);
+				LCDManager.print("Hi, " + username);
+				asyncTimer.setTimeout([]() {
+					LCDManager.clearRow(LCDManager.getLcdRows() - 1);
+				}, 3000);
 				LOG__DEBUG("Give Access [done]");
 
 				WebSocketServer.textAll("{\"command\":\"giveAccess\"}");
@@ -117,6 +123,11 @@ void _RFIDManager::handleCardAccess(String *uid, String *type)
 			LOG__DEBUG("Give Access");
 			OutputManager.toggleRelay();
 			OutputManager.buzzerTone(1, 500);
+			LCDManager.setCursor(0, LCDManager.getLcdRows() - 1);
+			LCDManager.print("Hi, " + username);
+			asyncTimer.setTimeout([]() {
+				LCDManager.clearRow(LCDManager.getLcdRows() - 1);
+			}, 3000);
 			LOG__DEBUG("Give Access [done]");
 
 			WebSocketServer.textAll("{\"command\":\"giveAccess\"}");
@@ -150,10 +161,17 @@ void _RFIDManager::handleCardAccess(String *uid, String *type)
 		serializeJson(doc, json);
 		WebSocketServer.textAll(json);
 
+		LCDManager.setCursor(0, LCDManager.getLcdRows() - 1);
+		LCDManager.print("Unauthorized card!");
+		asyncTimer.setTimeout([]() {
+			LCDManager.clearRow(LCDManager.getLcdRows() - 1);
+		}, 3000);
+
 		OutputManager.buzzerTone(1, 400);
 		asyncTimer.setTimeout([]() {
 			OutputManager.buzzerTone(1, 500);
 		}, 600);
+
 	}
 
 	LOG__DEBUG(F("Begin RFIDManager::handleCardAccess [done]"));

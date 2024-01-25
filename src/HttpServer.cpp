@@ -8,6 +8,7 @@
 
 // these are from vendors
 #include "webh/glyphicons-halflings-regular.woff.gz.h"
+#include "webh/Vazirmatn-Regular.woff2.gz.h"
 #include "webh/required.css.gz.h"
 #include "webh/required.js.gz.h"
 // these are from us which can be updated and changed
@@ -36,6 +37,16 @@ void ICACHE_FLASH_ATTR _HttpServer::setup()
 
 	this->on("/fonts/glyphicons-halflings-regular.woff", HTTP_GET, [](AsyncWebServerRequest *request) {
 		AsyncWebServerResponse *response = request->beginResponse_P(200, "font/woff", glyphicons_halflings_regular_woff_gz, glyphicons_halflings_regular_woff_gz_len);
+		response->addHeader("Content-Encoding", "gzip");
+		request->send(response);
+	});
+	this->on("/fonts/Vazirmatn-Regular.woff", HTTP_GET, [](AsyncWebServerRequest *request) {
+		AsyncWebServerResponse *response = request->beginResponse_P(200, "font/woff", Vazirmatn_Regular_woff2_gz, Vazirmatn_Regular_woff2_gz_len);
+		response->addHeader("Content-Encoding", "gzip");
+		request->send(response);
+	});
+	this->on("/fonts/Vazirmatn-Regular.woff2", HTTP_GET, [](AsyncWebServerRequest *request) {
+		AsyncWebServerResponse *response = request->beginResponse_P(200, "font/woff", Vazirmatn_Regular_woff2_gz, Vazirmatn_Regular_woff2_gz_len);
 		response->addHeader("Content-Encoding", "gzip");
 		request->send(response);
 	});

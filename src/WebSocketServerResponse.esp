@@ -163,6 +163,61 @@ void ICACHE_FLASH_ATTR wsSendUserList(int page, AsyncWebSocketClient *client) {
 	}
 }
 
+void ICACHE_FLASH_ATTR sendEventLog(int page) {
+	JsonDocument root;
+	root["command"] = "eventlist";
+	root["page"] = page;
+
+	JsonArray items = root.add<JsonArray>();
+	File eventlog = LittleFS.open("/eventlog.json", "r");
+	int first = (page - 1) * 10;
+	int last = page * 10;
+	int i = 0;
+	while (eventlog.available()) {
+		String item = String();
+		item = eventlog.readStringUntil('\n');
+		if (i >= first && i < last) {
+			items.add(item);
+		}
+		i++;
+	}
+	eventlog.close();
+	float pages = i / 10.0;
+	root["haspages"] = ceil(pages);
+
+	String json;
+	serializeJson(root, json);
+	WebSocketServer.textAll(json);
+	WebSocketServer.textAll("{\"command\":\"result\",\"resultof\":\"eventlist\",\"result\": true}");
+}
+
+void ICACHE_FLASH_ATTR sendLatestLog(int page) {
+	JsonDocument root;
+	root["command"] = "latestlist";
+	root["page"] = page;
+	JsonArray items = root.add<JsonArray>();
+	File latestlog = SPIFFS.open("/latestlog.json", "r");
+	int first = (page - 1) * 10;
+	int last = page * 10;
+	int i = 0;
+	while (latestlog.available()) {
+		String item = String();
+		item = latestlog.readStringUntil('\n');
+		if (i >= first && i < last) {
+			items.add(item);
+		}
+		i++;
+	}
+	latestlog.close();
+	float pages = i / 10.0;
+	root["haspages"] = ceil(pages);
+
+	String json;
+	serializeJson(root, json);
+	WebSocketServer.textAll(json);
+	WebSocketServer.textAll("{\"command\":\"result\",\"resultof\":\"eventlist\",\"result\": true}");
+}
+
 void ICACHE_FLASH_ATTR wsWriteConfigFileFromJsonDocument(JsonDocument *root)
 {
 	File file = LittleFS.open("/config.json", "w+");
