@@ -112,6 +112,39 @@ void ICACHE_FLASH_ATTR _WebSocketServer::process(AsyncWebSocketClient *client, s
 	else if (strcmp(command, "scan") == 0) {
 		WiFi.scanNetworksAsync(wsSendWifiScanResult, true);
 	}
+	else if (strcmp(command, "userlist") == 0) {
+		int page = root["page"];
+		wsSendUserList(page, client);
+	}
+	else if (strcmp(command, "remove") == 0) {
+		const char *uid = root["uid"];
+		String filename = "/P/";
+		filename += uid;
+		LittleFS.remove(filename);
+	}
+	else if (strcmp(command, "userfile") == 0) {
+		LOG__INFO("got new user to store");
+		const char *uid = root["uid"];
+		String filename = "/P/";
+		filename += uid;
+		LOG__DEBUG_F("Open file: %s to store user file", filename.c_str());
+		File file = LittleFS.open(filename, "w+");
+		// Check if we created the file
+		if (file)
+		{
+			LOG__DEBUG_F("Open file: %s to store user file [done]", filename.c_str());
+
+			String data;
+			serializeJson(root, data);
+			LOG__DEBUG_F("Store user data in file: %s data: %s", filename.c_str(), data.c_str());
+
+			auto writesize = serializeJson(root, file);
+			// size_t writesize = file.write(data.c_str());
+			LOG__DEBUG_F("Store %u user data in file: %s [done]", writesize, filename.c_str());
+		}
+		file.close();
+		WebSocketServer.textAll("{\"command\":\"result\",\"resultof\":\"userfile\",\"result\": true}");
+	}
 
 	free(client->_tempObject);
 	client->_tempObject = NULL;

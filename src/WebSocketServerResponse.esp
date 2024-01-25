@@ -116,6 +116,53 @@ void ICACHE_FLASH_ATTR wsSendWifiScanResult(int networksFound) {
 	WebSocketServer.textAll(json);
 }
 
+void ICACHE_FLASH_ATTR wsSendUserList(int page, AsyncWebSocketClient *client) {
+	JsonDocument root;
+	root["command"] = "userlist";
+	root["page"] = page;
+	root["list"] = root.add<JsonArray>();
+
+	Dir dir = LittleFS.openDir("/P/");
+	int first = (page - 1) * 15;
+	int last = page * 15;
+	int i = 0;
+	while (dir.next()) {
+		if (i >= first && i < last) {
+			JsonObject item = root["list"].add<JsonObject>();
+			String uid = dir.fileName();
+			uid.remove(0, 3);
+			item["uid"] = uid;
+			String filename = "/P/";
+			filename += dir.fileName().c_str();
+			File file = LittleFS.open(filename, "r");
+
+			JsonDocument user;
+			DeserializationError error = deserializeJson(user, file.readString().c_str());
+			if (error)
+			{
+				LOG__WARN_F("wsSendUserList: failed to parse json file, code: %d error: %s", error.code(), error.c_str());
+				continue;
+			}
+			item["username"] = user["user"].as<String>();
+			item["acctype"] = user["acctype"].as<unsigned int>();
+			item["validuntil"] = user["validuntil"].as<unsigned int>();
+		}
+		i++;
+	}
+	float pages = i / 15.0;
+	root["haspages"] = ceil(pages);
+
+	String json;
+	serializeJson(root, json);
+	WebSocketServer.textAll(json);
+	if (client) {
+		client->text(json);
+		client->text("{\"command\":\"result\",\"resultof\":\"userlist\",\"result\": true}");
+	} else {
+		WebSocketServer.textAll("{\"command\":\"result\",\"resultof\":\"userlist\",\"result\": false}");
+	}
+}
+
 void ICACHE_FLASH_ATTR wsWriteConfigFileFromJsonDocument(JsonDocument *root)
 {
 	File file = LittleFS.open("/config.json", "w+");

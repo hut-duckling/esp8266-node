@@ -700,36 +700,6 @@ function restore1by1(i, len, data) {
     }
 }
 
-function restoreUser() {
-    var input = document.getElementById("restoreUser");
-    var reader = new FileReader();
-    if ("files" in input) {
-        if (input.files.length === 0) {
-            alert("شما هیچ فایلی را برای بازگردانی انتخاب نکرده‌اید");
-        } else {
-            reader.onload = function() {
-                var json;
-                try {
-                    json = JSON.parse(reader.result);
-                } catch (e) {
-                    alert("فایل انتخاب شده معتبر نیست");
-                    return;
-                }
-                if (json.type === "esp-rfid-userbackup") {
-                    var x = confirm("فایل معتبر می‌باشد؛ اما آیا تمایل به ادامه دارید?");
-                    if (x) {
-                        recordstorestore = json.list.length;
-                        data = json.list;
-                        restorestarted = true;
-                        $("#restoremodal").modal({ backdrop: "static", keyboard: false });
-                        restore1by1(slot, recordstorestore, data);
-                    }
-                }
-            };
-            reader.readAsText(input.files[0]);
-        }
-    }
-}
 
 function twoDigits(value) {
     if (value < 10) {

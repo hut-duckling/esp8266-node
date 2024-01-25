@@ -6,6 +6,8 @@
 #include <LittleFS.h>
 #include <ArduinoJson.h>
 #include <OutputManager.hpp>
+#include <TimeLib.h>
+#include <WebSocketServer.hpp>
 
 extern AsyncTimer asyncTimer;
 _RFIDManager RFIDManager;
@@ -70,32 +72,89 @@ void _RFIDManager::handleCardAccess(String *uid, String *type)
 {
 	LOG__DEBUG_F("Begin RFIDManager::handleCardAccess uid: %s type: %s", uid->c_str(), type->c_str());
 
-	// int AccType = 0;
 	String filename = "/P/";
-	filename += *uid;
+	filename += uid->c_str();
+	LOG__INFO_F("RFIDManager::handleCardAccess try open file: %s", filename.c_str());
 	File file = LittleFS.open(filename, "r");
 	if (file)
 	{
 		LOG__WARN(F("RFIDManager::handleCardAccess there is File!"));
-		// JsonDocument json;
-		// size_t size = file.size();
-		// std::unique_ptr<char[]> buf(new char[size]);
-		// file.readBytes(buf.get(), size);
-		// DeserializationError error = deserializeJson(json, buf);
-		// if (error)
-		// {
-		// 	LOG__WARN(F("RFIDManager::handleCardAccess failed to parse users file"));
-		// 	return;
-		// }
-		// OutputManager.toggleRelay();
+		JsonDocument user;
+		const String content = file.readString();
+		LOG__INFO_F("_RFIDManager::handleCardAccess file content: %s %s", content.c_str(), file.readString().c_str());
+		DeserializationError error = deserializeJson(user, content);
+		if (error)
+		{
+			LOG__WARN_F("_RFIDManager::handleCardAccess: failed to parse json file, code: %d error: %s", error.code(), error.c_str());
+			file.close();
+			return;
+		}
+		
+		String username = user["user"].as<String>();
+		unsigned int accountType = user["acctype"].as<unsigned int>();
+		if (accountType == 1)
+		{
+			unsigned long validL = user["validuntil"].as<unsigned long>();
+			unsigned long nowL = now();
+			if (validL > nowL)
+			{
+				LOG__DEBUG("Give Access");
+				OutputManager.toggleRelay();
+				OutputManager.buzzerTone(1, 500);
+				LOG__DEBUG("Give Access [done]");
+
+				WebSocketServer.textAll("{\"command\":\"giveAccess\"}");
+			} else {
+				LOG__DEBUG("Give Access: card expired");
+				OutputManager.buzzerTone(1, 500);
+				asyncTimer.setTimeout([]() {
+					OutputManager.buzzerTone(1, 500);
+				}, 1500);
+			}
+		}
+		else if (accountType == 99)
+		{
+			LOG__DEBUG("Give Access");
+			OutputManager.toggleRelay();
+			OutputManager.buzzerTone(1, 500);
+			LOG__DEBUG("Give Access [done]");
+
+			WebSocketServer.textAll("{\"command\":\"giveAccess\"}");
+		}
+		else
+		{
+			LOG__WARN("Card has no access!");
+			JsonDocument doc;
+			doc["command"] = "piccscan";
+			doc["uid"] = uid->c_str();
+			doc["type"] = type->c_str();
+			doc["known"] = 1;
+			doc["acctype"] = 0;
+			doc["user"] = username;
+
+			String json;
+			serializeJson(doc, json);
+			WebSocketServer.textAll(json);
+		}
+
+		file.close();
 	} else {
 		LOG__WARN(F("RFIDManager::handleCardAccess there is no file!"));
-	}
+		JsonDocument doc;
+		doc["command"] = "piccscan";
+		doc["uid"] = uid->c_str();
+		doc["type"] = type->c_str();
+		doc["known"] = 0;
+		doc["user"] = "استاد جدید";
+		String json;
+		serializeJson(doc, json);
+		WebSocketServer.textAll(json);
 
-	LOG__DEBUG("Begin RFIDManager::handleCardAccess toggleRelay");
-	OutputManager.toggleRelay();
-	OutputManager.buzzerTone(1, 500);
-	LOG__DEBUG("Begin RFIDManager::handleCardAccess toggleRelay [done]");
+		OutputManager.buzzerTone(1, 400);
+		asyncTimer.setTimeout([]() {
+			OutputManager.buzzerTone(1, 500);
+		}, 600);
+	}
 
 	LOG__DEBUG(F("Begin RFIDManager::handleCardAccess [done]"));
 }

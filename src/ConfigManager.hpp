@@ -26,7 +26,8 @@ public:
 		.failedConnectCountFallback=50};
 	HardwareConfig hardware;
 	GeneralConfig general = {
-		.password = "admin"};
+		.password = "admin",
+		.hostname=WifiManager.getDefaultHostname()};
 	MqttConfig mqtt;
 	NtpConfig ntp = {
 		.server = "pool.ntp.org", // currently, WiFi.hostByName SUCKS! use IP instead.

@@ -36,6 +36,7 @@ void _WifiManager::reload(NetworkConfig *network = nullptr) {
 		LOG__INFO_F("Running WiFi in soft-AP mode. SSID = %s", network->ssid.c_str());
 		LOG__DEBUG_F("\tPassword = %s", network->password.c_str());
 		WiFi.mode(WIFI_AP);
+		ConfigManager.network.failedConnectCountFallback = 0; // we already in AP mode
 
 		IPAddress apip;
 		apip.fromString(network->apip);
