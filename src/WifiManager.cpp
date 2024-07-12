@@ -192,6 +192,6 @@ String _WifiManager::getDefaultHostname()
 	uint8_t macAddr[WL_MAC_ADDR_LENGTH];
 	WiFi.softAPmacAddress(macAddr);
 	char buf[24];
-	sprintf(buf, "ESP-HUT-DUCKLING-%02x%02x%02x", macAddr[3], macAddr[4], macAddr[5]);
+	sprintf(buf, "HUT-DUCKLING-%02x%02x%02x", macAddr[3], macAddr[4], macAddr[5]);
 	return String(buf);
 }
