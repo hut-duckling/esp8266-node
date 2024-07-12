@@ -11,7 +11,7 @@ _Logger Logger(&Serial);
 void _Logger::setup()
 {
 	stream->flush();
-	Serial.begin(115200);
+	Serial.begin(115200, SERIAL_8N1, SERIAL_TX_ONLY);
 	Serial.setDebugOutput(true);
 }
 
