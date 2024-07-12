@@ -33,70 +33,78 @@ void _LCDManager::setup()
 	createChar(CELSIUS_SYM, CHAR_CELSIUS);
 	LOG__DEBUG(F("Begin LCDManager::setup [done]"));
 
-	int view = 0;
-	asyncTimer.setInterval([&, view]() mutable {
+	asyncTimer.setInterval([&]() mutable {
+		this->clearRow(0);
+
 		int lastLength = 0;
 
-		if (view == 0)
-		{
-			this->clearRow(0);
-			String light(SensorsManager.getLightPercent() + '%');
-			this->setCursor(this->getLcdCols() - (lastLength += light.length()), 0);
-			this->print(light.c_str());
+		String light(SensorsManager.getLightPercent() + '%');
+		this->setCursor(this->getLcdCols() - (lastLength += light.length()), 0);
+		this->print(light.c_str());
 
-			String temperature((int)SensorsManager.getAvgTempreture());
-			this->setCursor(this->getLcdCols() - (lastLength += temperature.length()
-				+ 1 // one for CELSIUS_SYM
-				+ 1 // one space for space between light percent and temperature
-			), 0);
-			this->print(temperature);
-			this->write(CELSIUS_SYM);
+		String temperature((int)SensorsManager.getAvgTempreture());
+		this->setCursor(this->getLcdCols() - (lastLength += temperature.length()
+			+ 1 // one for CELSIUS_SYM
+			+ 1 // one space for space between light percent and temperature
+		), 0);
+		this->print(temperature);
+		this->write(CELSIUS_SYM);
 
-			if (this->getLcdCols() - lastLength >= 5) { // 03:30
-				this->setCursor(0, 0);
-				if (this->getLcdCols() - lastLength >= 8) { // 03:30:33]
-					char time[9];
-					sprintf(time, "%02d:%02d:%02d", hour(), minute(), second());
-					LOG__TRACE_F("time is: %s", time);
-					this->print(time);
-				} else { // 03:30
-					char time[6];
-					sprintf(time, "%02d:%02d", hour(), minute());
-					LOG__TRACE_F("time is: %s", time);
-					this->print(time);
-				}
+		if (this->getLcdCols() - lastLength >= 5) { // 03:30
+			this->setCursor(0, 0);
+			if (this->getLcdCols() - lastLength >= 8) { // 03:30:33]
+				char time[9];
+				sprintf(time, "%02d:%02d:%02d", hour(), minute(), second());
+				LOG__TRACE_F("time is: %s", time);
+				this->print(time);
+			} else { // 03:30
+				char time[6];
+				sprintf(time, "%02d:%02d", hour(), minute());
+				LOG__TRACE_F("time is: %s", time);
+				this->print(time);
 			}
 		}
-		else if (view == 1)
+	}, 1 * 1000);
+
+	int view = 0;
+	asyncTimer.setInterval([&, view]() mutable {
+		this->clearRow(1);
+		if (view == 0)
 		{
-			this->clearRow(0);
-			this->setCursor(0, 0);
+			this->setCursor(0, 1);
 			this->write(WIFI_SIGNAL_C_SYM);
 
 			String ip = WifiManager.getIpAddress().toString();
 			if (ip.length() < this->getLcdCols() - 1) {
-				this->setCursor(2, 0);
+				this->setCursor(2, 1);
 			} else {
-				this->setCursor(1, 0);
+				this->setCursor(1, 1);
 			}
 			this->print(WifiManager.getIpAddress().toString().c_str());
 		}
+		else if (view == 1)
+		{
+			this->setCursor(0, 1);
+			this->write(WIFI_SIGNAL_C_SYM);
+			String ssid = WifiManager.getWifiSSID();
+			if (ssid.length() < this->getLcdCols() - 1) {
+				this->setCursor(2, 1);
+			} else {
+				this->setCursor(1, 1);
+			}
+			if (ssid.length() > this->getLcdCols() - 1) {
+				ssid = ssid.substring(0, this->getLcdCols() - 1);
+			}
+			this->print(ssid);
+		}
 		else if (view == 2)
 		{
-			this->clearRow(0);
-			this->setCursor(0, 0);
-			this->write(WIFI_SIGNAL_C_SYM);
-			this->print(WifiManager.getWifiSSID().c_str());
-		}
-		else if (view == 3)
-		{
-			this->clearRow(0);
-			this->setCursor(0, 0);
+			this->setCursor(0, 1);
 			this->print(F("FreeHeap: "));
 			this->print(ESP.getFreeHeap());
 		}
 
-		if (++view > 3)
+		if (++view > 2)
 		{
 			view = 0;
 		}
