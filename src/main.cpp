@@ -42,7 +42,7 @@ void setup()
   LOG__DEBUG("Setuping WifiManager [done]");
 
   LOG__DEBUG("Starting I2CScanner Service");
-  I2CScanner.setup();
+  // I2CScanner.setup();
   // I2CScanner.start();
   LOG__DEBUG("Starting I2CScanner Service [done]");
 
