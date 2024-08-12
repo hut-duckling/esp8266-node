@@ -43,7 +43,7 @@ void _LCDManager::setup()
 
 		const uint8_t lightAndTempRow = 1;
 		this->setCursor(0, lightAndTempRow);
-		this->printf("Light %02d%% Temp %.2fc", SensorsManager.getLightPercent(), SensorsManager.getAvgTempreture());
+		this->printf("Light %02d%% Temp %.1fc", SensorsManager.getLightPercent(), SensorsManager.getAvgTempreture());
 	}, 1 * 1000);
 
 	int view = 0;
