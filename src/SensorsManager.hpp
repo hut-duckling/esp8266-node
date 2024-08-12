@@ -20,7 +20,7 @@ public:
 	void setup();
 	float getLastTempreture();
 	float getAvgTempreture();
-	String getLightPercent();
+	uint getLightPercent();
 
 private:
 	_Logger *logger;
