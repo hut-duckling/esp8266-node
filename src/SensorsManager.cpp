@@ -16,48 +16,58 @@ void _SensorsManager::setup()
 {
 	LOG__DEBUG("Begin SensorsManager::setup");
 
-	OneWire oneWire(TEMPRETURE_SENSOR_ONE_WIRE_PIN);
-	tempSensor = new DallasTemperature(&oneWire, TEMPRETURE_SENSOR_ONE_WIRE_PIN);
-	tempSensor->begin();
-	int deviceCount = tempSensor->getDeviceCount();
-	LOG__INFO_F("The temperature sensors count is: %d", deviceCount);
-
-	asyncTimer.setInterval([&]() {
+	bool isWarmedUp = false;
+	do {
+		OneWire oneWire(TEMPRETURE_SENSOR_ONE_WIRE_PIN);
+		tempSensor = new DallasTemperature(&oneWire);
 		tempSensor->begin();
 
-		float tempSum = 0;
-		auto response = tempSensor->requestTemperatures();
-		if (response.result) {
-			// LOG__INFO_F("tempSensor->requestTemperatures at (%d) is true!", response.timestamp);
-		} else {
-			LOG__INFO_F("tempSensor->requestTemperatures at (%d) is false!", response.timestamp);
-		}
-
 		int deviceCount = tempSensor->getDeviceCount();
-		int dS18Count = tempSensor->getDS18Count();
-		LOG__INFO_F("Update temperature: deviceCount is: %d dS18Count is: %d pin is: GPIO%d",
-			deviceCount, dS18Count, TEMPRETURE_SENSOR_ONE_WIRE_PIN);
+		LOG__INFO_F("The temperature sensors count is: %d", deviceCount);
+		if (deviceCount > 0) {
+			isWarmedUp = true;
 
-		for (int i = 0; i < deviceCount; i++)
-		{
-			float it = tempSensor->getTempCByIndex(i);
-			if (DEVICE_DISCONNECTED_C == it) {
-				LOG__ERROR_F("Error reading temperature of sensor at index: %d", i);
-			} else {
-				LOG__INFO_F("The temperature of sensor at index: %d is %f", i, it);
-				tempSum += it;
-			}
+			asyncTimer.setTimeout([&]() {
+				asyncTimer.setInterval([&]() {
+					float tempSum = 0;
+					auto response = tempSensor->requestTemperatures();
+					if (response.result) {
+						// LOG__INFO_F("tempSensor->requestTemperatures at (%d) is true!", response.timestamp);
+					} else {
+						LOG__INFO_F("tempSensor->requestTemperatures at (%ld) is false!", response.timestamp);
+					}
+
+					int deviceCount = tempSensor->getDeviceCount();
+					int dS18Count = tempSensor->getDS18Count();
+					LOG__INFO_F("Update temperature: deviceCount is: %d dS18Count is: %d pin is: GPIO%d",
+						deviceCount, dS18Count, TEMPRETURE_SENSOR_ONE_WIRE_PIN);
+
+					for (int i = 0; i < deviceCount; i++)
+					{
+						float it = tempSensor->getTempCByIndex(i);
+						if (DEVICE_DISCONNECTED_C == it) {
+							LOG__ERROR_F("Error reading temperature of sensor at index: %d", i);
+						} else {
+							LOG__INFO_F("The temperature of sensor at index: %d is %f", i, it);
+							tempSum += it;
+						}
+					}
+					if (deviceCount > 0 && tempSum > 0) {
+						this->lastTemperature = tempSum / deviceCount;
+						this->temperatureSamples[this->temperatureSamplesIndex] = this->lastTemperature;
+						this->temperatureSamplesIndex = (this->temperatureSamplesIndex + 1) % TEMPRETURE_SENSOR_SAMPLE_SIZE;
+
+						LOG__INFO_F("The temperature average is: %f", this->lastTemperature);
+					}
+				}, 1 * 1000);
+
+				LOG__DEBUG("Begin SensorsManager::setup [done]");
+			}, tempSensor->millisToWaitForConversion());
+		} else {
+			delete tempSensor;
 		}
-		if (deviceCount > 0 && tempSum > 0) {
-			this->lastTemperature = tempSum / deviceCount;
-			this->temperatureSamples[this->temperatureSamplesIndex] = this->lastTemperature;
-			this->temperatureSamplesIndex = (this->temperatureSamplesIndex + 1) % TEMPRETURE_SENSOR_SAMPLE_SIZE;
 
-			LOG__INFO_F("The temperature average is: %f", this->lastTemperature);
-		}
-	}, 1 * 1000);
-
-	LOG__DEBUG("Begin SensorsManager::setup [done]");
+	} while (!isWarmedUp);
 }
 
 float _SensorsManager::getLastTempreture()
