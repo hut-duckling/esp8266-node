@@ -136,6 +136,9 @@ struct NtpConfig
 		server = (*doc)[key]["server"].as<String>();
 		interval = (*doc)[key]["interval"].as<unsigned int>();
 		timezone = (*doc)[key]["timezone"].as<int>();
+		if (0 == timezone) {
+			timezone = 12600;
+		}
 	}
 	inline void addToJsonDocument(JsonDocument *doc, const char* key)
 	{

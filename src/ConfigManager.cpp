@@ -120,8 +120,8 @@ void _ConfigManager::setupNTP()
     if (!this->ntpClient) {
         ntpClient = new NtpClient();
         const char *ntpserver = this->ntp.server.c_str();
-        LOG__DEBUG_F("Set NTP server: %s", ntpserver);
-        LOG__DEBUG_F("Set NTP timezone to: %d", this->ntp.timezone);
+        LOG__INFO_F("Set NTP server: %s", ntpserver);
+        LOG__INFO_F("Set NTP timezone to: %d", this->ntp.timezone);
         ntpClient->Ntp(
             ntpserver,
             this->ntp.timezone,
