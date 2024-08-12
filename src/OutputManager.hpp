@@ -28,8 +28,10 @@ public:
 	void buzzerNoTone();
 	void buzzerTone(unsigned int frequency);
 	void buzzerTone(unsigned int frequency, unsigned long duration);
+	void buzzerTone(unsigned int frequency, unsigned long duration1, unsigned long delay, unsigned long duration2);
 private:
 	bool relayState = false;
+	bool buzzerState = false;
 };
 
 extern _OutputManager OutputManager;

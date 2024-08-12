@@ -51,3 +51,11 @@ void _OutputManager::buzzerTone(unsigned int frequency, unsigned long duration)
         this->buzzerNoTone();
     }, duration);
 }
+
+void _OutputManager::buzzerTone(unsigned int frequency, unsigned long duration1, unsigned long delay, unsigned long duration2)
+{
+    this->buzzerTone(frequency, duration1);
+    asyncTimer.setTimeout([&]() {
+        this->buzzerTone(frequency, duration2);
+    }, duration1 + delay);
+}
