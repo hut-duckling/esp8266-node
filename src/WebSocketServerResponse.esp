@@ -156,7 +156,7 @@ void ICACHE_FLASH_ATTR wsSendUserList(int page, AsyncWebSocketClient *client) {
 	serializeJson(root, json);
 	WebSocketServer.textAll(json);
 	if (client) {
-		client->text(json);
+		// client->text(json);
 		client->text("{\"command\":\"result\",\"resultof\":\"userlist\",\"result\": true}");
 	} else {
 		WebSocketServer.textAll("{\"command\":\"result\",\"resultof\":\"userlist\",\"result\": false}");
