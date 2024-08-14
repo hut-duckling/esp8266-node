@@ -1,6 +1,7 @@
 #include <OutputManager.hpp>
 #include <Logger.hpp>
 #include <AsyncTimer.h>
+#include <TimeLib.h>
 
 extern AsyncTimer asyncTimer;
 _OutputManager OutputManager;
@@ -11,6 +12,20 @@ void _OutputManager::setup()
     pinMode(RELAY_PIN, OUTPUT);
     pinMode(BUZZER_PIN, OUTPUT);
     LOG__DEBUG("Begin OutputManager::setup [done]");
+
+    int buzzerHighCounterSeconds = 0;
+    asyncTimer.setInterval([&]() {
+        int buzzerValue = digitalRead(BUZZER_PIN);
+        LOG__INFO_F("Buzzer value is: %d counter is: %d", buzzerValue, buzzerHighCounterSeconds);
+        if (buzzerValue == 0)  {
+            buzzerHighCounterSeconds = 0;
+        } else if (++buzzerHighCounterSeconds > 5) {
+            LOG__INFO_F("Buzzer value is: %d counter is: %d call buzzerNoTone", buzzerValue, buzzerHighCounterSeconds);
+            this->buzzerNoTone();
+            LOG__INFO_F("Buzzer value is: %d counter is: %d call buzzerNoTone [done]", buzzerValue, buzzerHighCounterSeconds);
+        }
+        LOG__INFO_F("Buzzer value is: %d counter is: %d [done]", buzzerValue, buzzerHighCounterSeconds);
+    }, 1 * 1000);
 }
 
 void _OutputManager::toggleRelay()
@@ -37,6 +52,7 @@ void _OutputManager::setRelay(bool state)
 void _OutputManager::buzzerNoTone()
 {
     noTone(BUZZER_PIN);
+    digitalWrite(BUZZER_PIN, LOW);
 }
 
 void _OutputManager::buzzerTone(unsigned int frequency)
@@ -46,10 +62,7 @@ void _OutputManager::buzzerTone(unsigned int frequency)
 
 void _OutputManager::buzzerTone(unsigned int frequency, unsigned long duration)
 {
-    buzzerTone(frequency);
-    asyncTimer.setTimeout([&]() {
-        this->buzzerNoTone();
-    }, duration);
+    tone(BUZZER_PIN, frequency, duration);
 }
 
 void _OutputManager::buzzerTone(unsigned int frequency, unsigned long duration1, unsigned long delay, unsigned long duration2)
