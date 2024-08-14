@@ -11,10 +11,13 @@ class _RFIDManager
 public:
 	void setup();
 	void scan();
-	void handleCardAccess(String *uid, String *type);
-
+	void handleCardAccess(String &uid, String &type);
 protected:
-	void dumpVersionToSerial();
+	bool hasLocalAccess(String &uid, String &type, String &username);
+	bool hasRemoteAccess(String &uid, String &type, String &username);
+
+	void handleCardHasAccess(String &uid, String &type, String &username);
+	void handleCardHasNoAccess(String &uid, String &type);
 
 private:
 	_Logger *logger;
