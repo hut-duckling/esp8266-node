@@ -87,7 +87,7 @@ function deviceTime() {
 
 function syncBrowserTime() {
     var d = new Date();
-    var timestamp = Math.floor((d.getTime() / 1000));
+    var timestamp = Math.floor((d.getTime() / 1000) + d.getTimezoneOffset() * 60);
     var datatosend = {};
     datatosend.command = "settime";
     datatosend.epoch = timestamp;
@@ -528,7 +528,7 @@ function getnextpage(mode) {
 }
 
 function builddata(obj) {
-    data = data.concat(obj.list);
+    data = data.concat(obj.list === null ? [] : obj.list);
 }
 
 
@@ -876,6 +876,7 @@ function initLatestLogTable() {
 
 function initUserTable() {
     jQuery(function($) {
+        console.log("initUserTable:data:", data)
         var $modal = $("#editor-modal"),
             $editor = $("#editor"),
             $editorTitle = $("#editor-title"),
@@ -920,7 +921,7 @@ function initUserTable() {
                         },
                     }
                 ],
-                rows: data,
+                rows: data || [],
                 editing: {
                     showText: "<span class=\"fooicon fooicon-pencil\" aria-hidden=\"true\"></span> ویرایش کاربران",
                     addText: "کاربر/استاد جدید",
