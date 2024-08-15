@@ -122,6 +122,7 @@ void ICACHE_FLASH_ATTR _WebSocketServer::process(AsyncWebSocketClient *client, s
 		String filename = "/P/";
 		filename += uid;
 		LittleFS.remove(filename);
+		wsSendUserList(1, client);
 	}
 	else if (strcmp(command, "geteventlog") == 0)
 	{
