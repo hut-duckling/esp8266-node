@@ -17,10 +17,7 @@ void _SensorsManager::setup()
 	LOG__DEBUG("Begin SensorsManager::setup");
 
 	bool isWarmedUp = false;
-	asyncTimer.setInterval([&]() {
-		if (isWarmedUp) {
-			return;
-		}
+	do {
 		OneWire oneWire(TEMPRETURE_SENSOR_ONE_WIRE_PIN);
 		tempSensor = new DallasTemperature(&oneWire);
 		tempSensor->begin();
@@ -66,10 +63,11 @@ void _SensorsManager::setup()
 
 				LOG__DEBUG("Begin SensorsManager::setup [done]");
 			}, tempSensor->millisToWaitForConversion());
-		} else if (tempSensor) {
+		} else {
 			delete tempSensor;
 		}
-	}, 500);
+
+	} while (!isWarmedUp);
 }
 
 float _SensorsManager::getLastTempreture()
