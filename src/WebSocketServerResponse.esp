@@ -135,6 +135,9 @@ void ICACHE_FLASH_ATTR wsSendUserList(int page, AsyncWebSocketClient *client) {
 			String filename = "/P/";
 			filename += dir.fileName().c_str();
 			File file = LittleFS.open(filename, "r");
+			if (!file) {
+				continue;
+			}
 
 			JsonDocument user;
 			DeserializationError error = deserializeJson(user, file.readString().c_str());
