@@ -121,7 +121,14 @@ void ICACHE_FLASH_ATTR _WebSocketServer::process(AsyncWebSocketClient *client, s
 		const char *uid = root["uid"];
 		String filename = "/P/";
 		filename += uid;
-		LittleFS.remove(filename);
+		LOG__INFO_F("Try removing: %s", filename.c_str());
+		bool result = LittleFS.remove(filename);
+		if (result) {
+			LOG__INFO_F("Try removing: %s [done]", filename.c_str());
+		} else {
+			LOG__INFO_F("Try removing: %s [faild]", filename.c_str());
+			LittleFS.rmdir(filename.c_str());
+		}
 		wsSendUserList(1, client);
 	}
 	else if (strcmp(command, "geteventlog") == 0)
