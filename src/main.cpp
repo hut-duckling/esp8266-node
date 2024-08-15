@@ -24,9 +24,10 @@ void setup()
   Logger.setup();
   LOG__INFO("Starting");
 
-  if (! LittleFS.begin()) {
+  if (! LittleFS.begin() && !SPIFFS.begin()) {
     LOG__ERROR("Can not start LittleFS! so format it!");
     LittleFS.format();
+    SPIFFS.format();
   }
 
   LOG__DEBUG("Loading ConfigManager");
@@ -41,10 +42,10 @@ void setup()
   WifiManager.setup();
   LOG__DEBUG("Setuping WifiManager [done]");
 
-  LOG__DEBUG("Starting I2CScanner Service");
+  // LOG__DEBUG("Starting I2CScanner Service");
   // I2CScanner.setup();
   // I2CScanner.start();
-  LOG__DEBUG("Starting I2CScanner Service [done]");
+  // LOG__DEBUG("Starting I2CScanner Service [done]");
 
   LOG__DEBUG("Setuping SensorsManager");
   SensorsManager.setup();
