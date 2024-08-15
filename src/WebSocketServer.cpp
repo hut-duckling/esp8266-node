@@ -127,7 +127,15 @@ void ICACHE_FLASH_ATTR _WebSocketServer::process(AsyncWebSocketClient *client, s
 			LOG__INFO_F("Try removing: %s [done]", filename.c_str());
 		} else {
 			LOG__INFO_F("Try removing: %s [faild]", filename.c_str());
-			LittleFS.rmdir(filename.c_str());
+
+			LOG__INFO_F("Try removing: %s using SPIFFS", filename.c_str());
+			if (SPIFFS.remove(filename.c_str())) {
+				LOG__INFO_F("Try removing: %s using SPIFFS [done]", filename.c_str());
+			} else {
+				LOG__INFO_F("Try removing: %s using SPIFFS [faild]", filename.c_str());
+
+				LittleFS.rmdir(filename.c_str());
+			}
 		}
 		wsSendUserList(1, client);
 	}
