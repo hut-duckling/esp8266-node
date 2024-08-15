@@ -528,6 +528,9 @@ function getnextpage(mode) {
 }
 
 function builddata(obj) {
+    if (data.length) {
+        data = [];
+    }
     data = data.concat(obj.list === null ? [] : obj.list);
 }
 
