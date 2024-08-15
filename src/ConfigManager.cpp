@@ -125,7 +125,7 @@ void _ConfigManager::setupNTP()
         ntpClient->Ntp(
             ntpserver,
             this->ntp.timezone,
-            0
+            this->ntp.interval
         );
     }
 }
