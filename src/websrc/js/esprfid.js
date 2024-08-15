@@ -16,7 +16,7 @@ var config = {
         "wmode": 1,
         "hide": 0,
         "pswd": "",
-        "failed_connect_count": 0,
+        "failed_connect_count": 10,
         "dhcp": 1,
         "ip": "",
         "subnet": "",
